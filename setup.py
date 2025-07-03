@@ -94,6 +94,10 @@ train.loc[mod1, "image_name"] = "b588e1b55fbf8c4c6af08886013c0c36b70dd617fb1a507
 train.loc[mod2, "image_name"] = "8cc5870f73527da07937acc806002e1272e6200095c656ca326a680a90fab507.png"
 test.loc[mod3, "image_name"] = "094dcc9098204e6f751504515f3b0a7b5f5ad500a8bd2ec10124ed3d4fdbb6ed.png"
 
+# Save the files with the fixes 
+train.to_csv(csv_train_path, index=False)
+test.to_csv(csv_test_path, index=False)
+
 # Get the file names for the images
 train_files = train["image_name"].tolist() 
 valid_files = valid["image_name"].tolist() 
