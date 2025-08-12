@@ -1,6 +1,7 @@
 
 # This file contains some functions and other tools needed throughout the project 
 
+# Needed libraries and modules
 import os
 import shutil 
 import imageio
@@ -61,7 +62,7 @@ def color_transfer(X_i, Y_j, loss, lr=1):
             Learning rate, i.e. time step.
     """
 
-    # Parameters for the gradient descent
+    # Parameter for the gradient descent
     Nsteps = 11
 
     # Make sure that we won't modify the reference samples
