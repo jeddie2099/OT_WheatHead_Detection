@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import math
 import random
+from ultralytics import YOLO
+import cv2
 
 # Function for copying files from one folder to another
 def copy_files(source_folder, file_list, destination_folder):
@@ -26,7 +28,7 @@ def copy_files(source_folder, file_list, destination_folder):
         shutil.copy(source_file_path, destination_file_path)
         print(f'{file_name} successfully copied to {destination_folder}')
 
-
+####################################################################################################################################
 # Load images and normalize them to [0,1]
 def load_image(fname):
     img = imageio.v2.imread(fname)  # RGB
@@ -50,7 +52,7 @@ def display_image(ax, x):
     x_ = x.view(W, W, 3).detach().cpu().numpy()
     ax.imshow(x_)
 
-
+###############################################################################################################################
 # Function to perform the color transfer between measures X_i and Y_j, as the gradient of some loss function 
 def color_transfer(X_i, Y_j, loss, lr=1):
     """Flows along the gradient of the loss function.
@@ -81,6 +83,7 @@ def color_transfer(X_i, Y_j, loss, lr=1):
         x_i.data -= lr * len(x_i) * g
     return x_i
 
+###############################################################################################################
 # Function that creates a panel of images belonging to different domains of the train, valid or test sets
 def show_domain_images(csv_path, image_folder, n_domains=5, n_per_domain=2, random_state=42):
     #Read the given csv file containing the image and domain names
@@ -131,3 +134,51 @@ def show_domain_images(csv_path, image_folder, n_domains=5, n_per_domain=2, rand
 
     plt.tight_layout()
     return fig
+
+######################################################################################################################################
+# Function to draw bounding boxes on a given image
+def draw_bbox(image, annotation):
+    height, width, _ = image.shape
+    with open(annotation, 'r') as file:
+        for line in file:
+            class_id, center_x, center_y, bbox_width, bbox_height = map(float, line.strip().split())
+            
+            # Convert YOLO format to OpenCV format
+            x1 = int((center_x - bbox_width / 2) * width)
+            y1 = int((center_y - bbox_height / 2) * height)
+            x2 = int((center_x + bbox_width / 2) * width)
+            y2 = int((center_y + bbox_height / 2) * height)
+            
+            # Draw the bounding box
+            color = (0, 255, 0)  # Green color for bbox
+            cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
+    return image
+
+def wheat_detection(trained_model, img, inference_path, annotation_path, output_path):
+    model = YOLO(trained_model)
+
+    # load an image and run inference on it
+    results = model.predict(img, imgsz=640, iou=0.5)
+
+    for r in results:
+        # Plot results image
+        im_bgr = r.plot(line_width=2, labels=False, save=True, filename=inference_path)  # BGR-order numpy array
+        im_rgb = Image.fromarray(im_bgr[..., ::-1])  # RGB-order PIL image
+
+    # Check if annotation file exists
+    if os.path.exists(annotation_path):
+        # Load image
+        image = cv2.imread(inference_path)
+        
+        # Draw bounding boxes
+        annotated_image = draw_bbox(image, annotation_path)
+        
+        # Save the annotated image
+        cv2.imwrite(output_path, annotated_image)
+
+        print(f"Saved annotated image: {output_path}")
+
+    else:
+        print(f"Invalid annotation file")
+
+    return annotated_image
