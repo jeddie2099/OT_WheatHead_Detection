@@ -12,10 +12,20 @@ This section contains the step-by-step instructions to set up and run this proje
 - Download the [GWHD 2021](https://zenodo.org/records/5092309) dataset and extract it as gwhd_2021 folder inside the main project folder
 - Clone this repository as another folder inside the main project folder
 ### Installing dependencies
-
+The project makes use of python 3.10.x and some dependencies that can be installed with pip. To install PyTorch, go to their [official site](https://pytorch.org/) and follow the installation guide for your specific CUDA version. For the rest of the dependencies, copy and paste the following commands in your terminal: 
+```
+pip install pykeops
+pip install geomloss
+pip install ultralytics
+```
 ### Applying OT-based domain adaptation
+As a first step after setting up the project folder, run the `setup.py` file, either on a terminal or through the  `OT_domain_adaptation.ipynb` notebook. Then, go over that notebook and run the cells to perform OT-based domain adaptation on the dataset images, creating a copy of the dataset with all the images having a similar color palette. You can tune the `blur` and `reach` parameters to change the way OT is calculated, as well as establish different target domains to experiment with the domain adaptation.
+
 ### Training and testing the models
+To train a YOLO model, you can first go over the Ultralytics page and download a [pre-trained model](https://docs.ultralytics.com/models/) of your choice, which will accelerate the training for the wheat head detection task. Then, run the cells of the `Object_detection_models.ipynb` notebook to train your model on the original dataset or the modified copy. The notebook also contains the code to test the model's performance, which uses Ultralytics `validation` mode on the test split to obtain the relevant metrics. 
+
 ### Inference with a single image
+For inference with a single image, you can load any image through its path and obtain the image with its bounding boxes. For this, you just have to run the cells on the `Inference.ipynb` notebook. You can load any of the models you train and experiment with images with or without OT preprocessing to see the results. 
 
 ## File description
 The repository contains the following python scripts and jupyter notebooks: 
